@@ -1,14 +1,14 @@
-
-import React, { Component } from 'react'
+import React, { Component } from 'react';
 import { ScrollView,SafeAreaView,StyleSheet, Text, View,TouchableOpacity } from 'react-native';
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
 import { getAuth,onAuthStateChanged } from "firebase/auth";
+import { getApps,initializeApp } from 'firebase/app';
 import { Provider } from 'react-redux';
 import store from './reduxModern/store/store'
+import Authentication from './components/auth/login';
 
 import Main from './components/Main';
-import Login from './components/auth/login'
+
+
 
 
 /* Initializing the firebase app and getting the analytics. */
@@ -22,24 +22,31 @@ const firebaseConfig = {
   measurementId: "G-PKLTW5WXSM"
 };
 
-const app = initializeApp(firebaseConfig);
-const analytics =  getAnalytics(app)
 
-console.log({analytics})
+if(getApps().length < 1){
+  const app = initializeApp(firebaseConfig);
+}
+
+
+// const analytics =  getAnalytics(app)
+// console.log({analytics})
 
 export class App extends Component {
 
   constructor(props){
     super(props);
     this.state = {
-        loaded:false,
+      loggedIn: true,
+       loaded:true,
     }
   }
 
  componentDidMount(){
-  const auth = getAuth(app);
+
+  const auth = getAuth();
 
    onAuthStateChanged(auth, (user) => {
+
     if (user) {
       // User is signed in, see docs for a list of available properties
       // https://firebase.google.com/docs/reference/js/firebase.User
@@ -63,6 +70,7 @@ export class App extends Component {
       )
 
     }
+
   });
  }
 
@@ -82,7 +90,7 @@ export class App extends Component {
   /* This is a conditional rendering. If the user is not logged in, it will render the login screen. */
    if(!loggedIn){
    return (
-     <Login />
+     <Authentication />
    )
    }
 
@@ -92,22 +100,11 @@ export class App extends Component {
  <Main />
 </Provider>
 
+
    )
  }
 }
 
-export default App
+export default App;
 
-const styles = StyleSheet.create({
-  container: {
-    width:'40%',
-    backgroundColor: 'aliceblue',
-    alignItems: 'center',
-    margin:'5px',
-   height:'100px',
-    display:'inline-block',
-    textAlign: 'center',
-    marginLeft:'5%',
-    cursor:'pointer'
-  }
-});
+

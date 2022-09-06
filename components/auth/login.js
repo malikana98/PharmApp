@@ -1,96 +1,107 @@
-import React, { Component } from 'react'
+import React, { useState } from 'react';
 import { Text,StyleSheet, View,Button,SafeAreaView,ScrollView,TextInput } from 'react-native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import Register from './register'
 import { getAuth, signInWithEmailAndPassword  } from 'firebase/auth';
-import { initializeApp } from "firebase/app";
-
-  
+//
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import Register from './register';
+import { NavigationContainer } from '@react-navigation/native';
 
 const Stack  = createNativeStackNavigator()
 
-export default class Login extends Component {
+export function Login(props){
 
-    constructor(props){
-        super(props);
-        this.state= {
-            email:'',
-            password:'',
-            msg:''
-            
-        }
-        this.onLogin = this.onLogin.bind(this)
-       
-    }
+    const [email,setEmail] = useState('');
+    const [password,setPassword] = useState('');
+    const [msg,setMsg] = useState('');
 
-    onLogin() {
-        const {email,password} = this.state;
-       
-        const auth = getAuth();
-       signInWithEmailAndPassword(auth, email, password)
-  .then((userCredential) => {
-    // Signed in 
-    const user = userCredential.user;
-    // ...
-  })
-  .catch((error) => {
-    const errorCode = error.code;
-    const errorMessage = error.message;
-    console.log({errorCode})
-    console.log({errorMessage})
-     
-    if(errorCode === 'auth/wrong-password'){
-       this.setState({
-        msg: "Incorrect email / password"
+    
+
+   const onLogin = () => {
+
+    if(email.trim() == ""){
+        setMsg("Enter Email Address")
+    } else {
+
+        if(password == ""){
+            setMsg("Enter Password")
+        } else{
+            setMsg("");
+
+            const auth = getAuth();
+            signInWithEmailAndPassword(auth, email, password)
+       .then((userCredential) => {
+         // Signed in 
+         const user = userCredential.user;
+         // ...
        })
-    }
+       .catch((error) => {
+         const errorCode = error.code;
+         const errorMessage = error.message;
+         console.log({errorCode})
+         console.log({errorMessage})
+          
+         if(errorCode === 'auth/wrong-password' || errorCode === 'auth/invalid-email'){
+            setMsg("Incorrect email / password")
+         }
+     
+       });
+        }
 
-  });
-
-
     }
-    direct () {
-        
-        <Stack.Navigator initialRouteName="Sign Up">
-            <Stack.Screen name="Sign Up" component={Register} />
-         </Stack.Navigator>
-    }
-    render() {
-           
+       
    
-   
+
+
+    }
         return (
             
           <View style={styles.cover}>
 <Text style={styles.heading}>Login</Text>
 
 <TextInput style={styles.input}
- onChangeText={(email) => this.setState({email})}
+ onChangeText={(email) => setEmail(email)}
 placeholder="Email Address" />
 
 <TextInput style={styles.input}
 secureTextEntry={true}
-onChangeText = {(password) => this.setState({password})}
+onChangeText = {(password) => setPassword(password)}
 placeholder="Password" />
 
-  <Text style={{textAlign:'center',color:'red'}}>{this.state.msg}</Text>
+  <Text style={{textAlign:'center',color:'red'}}>{msg}</Text>
   
 <View style={{width:300,marginTop:15}}>
-<Button style={{width:300,marginTop:10}} title="Login" onPress={()=> this.onLogin()} />
+<Button style={{width:300,marginTop:10}} title="Login" onPress={()=> onLogin()} />
 </View>
 
  <View style={{flexDirection:'row', marginVertical:10}}>
 
 <Text style={styles.question}>Don't have an Account? </Text>
-<Text style={styles.new} onPress ={() => this.direct() } >Sign Up</Text>
+<Text style={styles.new} onPress ={ () => props.navigation.navigate("Register")} >Sign Up</Text>
 
 </View>
 
             
           </View>
       
-        )
-    }
+        );
+    
+}
+
+export default function Authentication(props){
+return(
+    <NavigationContainer>
+    <Stack.Navigator 
+    screenOptions={{headerShown: false}}
+    >
+
+    <Stack.Screen name="Login" component={Login} />
+    <Stack.Screen name="Register" component={Register} />
+
+
+    </Stack.Navigator>
+    </NavigationContainer>
+)
+
 }
 
 const styles = StyleSheet.create({
